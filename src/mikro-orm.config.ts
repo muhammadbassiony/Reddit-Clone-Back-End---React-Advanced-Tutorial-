@@ -14,7 +14,7 @@ export default {
     password: 'admin',
     type: 'postgresql',
     debug: !__prod__,
-    discovery: {
-        tsConfigPath: "../tsconfig.json",
-    }
+    // discovery: {
+    //     tsConfigPath: "../tsconfig.json",
+    // }
 } as Parameters<typeof MikroORM.init>[0];
