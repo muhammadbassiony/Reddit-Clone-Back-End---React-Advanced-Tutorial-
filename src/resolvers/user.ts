@@ -12,6 +12,7 @@ import {
 } from "type-graphql";
 import { User } from "../entities/User";
 import argon2 from "argon2";
+import { EntityManager } from "@mikro-orm/postgresql";
 
 @InputType()
 class usernamePasswordInput {
@@ -54,6 +55,8 @@ export class UserResolver {
     return user;
   }
 
+  // ------------------------------------
+
   @Mutation(() => UserResponse)
   async register(
     @Arg("options") options: usernamePasswordInput,
@@ -70,7 +73,7 @@ export class UserResolver {
       };
     }
 
-    if (options.password.length <= 3) {
+    if (options.password.length <= 2) {
       return {
         errors: [
           {
@@ -82,14 +85,29 @@ export class UserResolver {
     }
 
     const hashedPassword = await argon2.hash(options.password);
-    const user = await em.create(User, {
-      username: options.username,
-      password: hashedPassword,
-    });
+    // const user = await em.create(User, {
+    //   username: options.username,
+    //   password: hashedPassword,
+    // });
 
+    let user;
     try {
-      await em.persistAndFlush(user);
+      const [result] = await (em as EntityManager)
+        .createQueryBuilder(User)
+        .getKnexQuery()
+        .insert({
+          username: options.username,
+          password: hashedPassword,
+          created_at: new Date(),
+          updated_at: new Date(),
+        })
+        .returning("*");
+
+      user = result;
+
+      // await em.persistAndFlush(user);
     } catch (err) {
+      // console.log(err);
       if (err.code === "23505" || err.detail.includes("already exists")) {
         //duplicate username
         return {
@@ -98,10 +116,13 @@ export class UserResolver {
       }
     }
 
+    // console.log(user);
     req.session.userId = user.id; //log in the user on registration
 
     return { user };
   }
+
+  // ------------------------------------
 
   @Mutation(() => UserResponse)
   async login(

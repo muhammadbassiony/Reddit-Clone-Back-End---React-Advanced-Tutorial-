@@ -44,8 +44,8 @@ const main = async () => {
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 yrs
         httpOnly: true,
-        sameSite: "none", //csrf //set to false for apollostudio
-        secure: !__prod__, // https : in prod only
+        sameSite: "lax", //csrf //set to false for apollostudio
+        secure: __prod__, // https : in prod only
       },
       saveUninitialized: false,
       secret: "kafnsdkddc.dds",
