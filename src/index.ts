@@ -16,6 +16,7 @@ import redis from "redis";
 import session from "express-session";
 import connectRedis from "connect-redis";
 import { MyContext } from "./types";
+import cors from "cors";
 
 const main = async () => {
   const orm = await MikroORM.init(microConfig);
@@ -27,6 +28,13 @@ const main = async () => {
   const redisClient = redis.createClient();
 
   app.use(
+    cors({
+      origin: ["https://studio.apollographql.com", "http://localhost:3001"],
+      credentials: true,
+    })
+  );
+
+  app.use(
     session({
       name: "qid",
       store: new RedisStore({
@@ -36,8 +44,8 @@ const main = async () => {
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 yrs
         httpOnly: true,
-        sameSite: "lax", //csrf //set to false for apollostudio
-        secure: __prod__, // https : in prod only
+        sameSite: "none", //csrf //set to false for apollostudio
+        secure: !__prod__, // https : in prod only
       },
       saveUninitialized: false,
       secret: "kafnsdkddc.dds",
@@ -50,18 +58,12 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res }): MyContext => ({ em: orm.em, req, res }),
+    context: ({ req, res }) => ({ em: orm.em, req, res }),
     // plugins: [ApolloServerPluginLandingPageGraphQLPlayground({})],
   });
 
-  const cors = {
-    credentials: true,
-    origin: "https://studio.apollographql.com",
-    exposedHeaders: ["Set-Cookie", "connection"],
-  };
-
   await apolloServer.start();
-  apolloServer.applyMiddleware({ app, cors });
+  apolloServer.applyMiddleware({ app, cors: false });
 
   app.listen(3000, () => {
     console.log("server started on port 3000");
