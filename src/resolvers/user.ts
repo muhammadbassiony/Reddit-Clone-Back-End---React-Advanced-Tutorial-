@@ -12,10 +12,12 @@ import {
 import { User } from "../entities/User";
 import argon2 from "argon2";
 import { EntityManager } from "@mikro-orm/postgresql";
-import { COOKIE_NAME } from "../constants";
+import { COOKIE_NAME, FORGET_PASS_PREFIX } from "../constants";
 import { usernamePasswordInput } from "./usernamePasswordInput";
 import { validateRegister } from "../utils/validateRegister";
 import { FieldError } from "./FieldError";
+import { sendEmail } from "../utils/sendEmail";
+import { v4 } from "uuid";
 
 @ObjectType()
 class UserResponse {
@@ -29,8 +31,24 @@ class UserResponse {
 @Resolver()
 export class UserResolver {
   @Mutation(() => Boolean)
-  async forgotPassword(@Arg("email") email: string, @Ctx() { em }: MyContext) {
-    // const user = await em.findOne(User, { username });
+  async forgotPassword(
+    @Arg("email") email: string,
+    @Ctx() { em, redis }: MyContext
+  ) {
+    const user = await em.findOne(User, { email });
+    if (!user) {
+      return true;
+    }
+
+    const token = v4();
+    console.log("TOKEN : ", token);
+    await redis.set(FORGET_PASS_PREFIX + token, user.id, "ex", 1000 * 60 * 60);
+    console.log("HERE");
+    await sendEmail(
+      email,
+      `<a href="http://localhost:3001/change-password/${token}">Reset Password</a>`
+    );
+
     return true;
   }
 
