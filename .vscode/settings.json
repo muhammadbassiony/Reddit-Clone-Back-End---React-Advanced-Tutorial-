@@ -1,15 +1,25 @@
 {
-    "cmake.configureOnOpen": false,
-    "sqltools.connections": [
-        {
-            "previewLimit": 50,
-            "server": "localhost",
-            "port": 5432,
-            "askForPassword": true,
-            "driver": "PostgreSQL",
-            "name": "lireddit-tut",
-            "username": "postgres",
-            "database": "lireddit"
-        }
-    ]
+  "cmake.configureOnOpen": false,
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "askForPassword": true,
+      "driver": "PostgreSQL",
+      "name": "lireddit-tut",
+      "username": "postgres",
+      "database": "lireddit"
+    },
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "askForPassword": true,
+      "driver": "PostgreSQL",
+      "name": "lireddit2",
+      "database": "lireddit2",
+      "username": "postgres"
+    }
+  ]
 }
