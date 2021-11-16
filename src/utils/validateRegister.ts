@@ -36,3 +36,15 @@ export const validateRegister = (options: usernamePasswordInput) => {
 
   return null;
 };
+
+export const validateNewPassword = (password: string) => {
+  if (password.length <= 2) {
+    const fe: FieldError = {
+      field: "newPassword",
+      message: "length must be greater than 2",
+    };
+    return fe;
+    // return false;
+  }
+  return null;
+};
