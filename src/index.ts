@@ -19,6 +19,7 @@ import { sendEmail } from "./utils/sendEmail";
 import { createConnection } from "typeorm";
 import { Post } from "./entities/Post";
 import { User } from "./entities/User";
+import { Updoot } from "./entities/Updoot";
 
 const main = async () => {
   const conn = createConnection({
@@ -28,7 +29,7 @@ const main = async () => {
     password: "admin",
     logging: true,
     synchronize: true,
-    entities: [Post, User],
+    entities: [Post, User, Updoot],
   });
 
   const app = express();
