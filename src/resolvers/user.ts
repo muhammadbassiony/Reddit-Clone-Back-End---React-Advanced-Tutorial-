@@ -85,10 +85,10 @@ export class UserResolver {
       { password: await argon2.hash(newPassword) }
     );
 
+    await redis.del(key);
+
     //log in after change
     req.session.userId = user.id;
-
-    await redis.del(key);
 
     return { user };
   }
@@ -129,7 +129,8 @@ export class UserResolver {
 
   @Mutation(() => UserResponse)
   async register(
-    @Arg("options") options: usernamePasswordInput
+    @Arg("options") options: usernamePasswordInput,
+    @Ctx() { req }: MyContext
   ): Promise<UserResponse> {
     const errors = validateRegister(options);
     if (errors) {
@@ -166,9 +167,9 @@ export class UserResolver {
     }
 
     // console.log(user);
-    // req.session.userId = user.id; //log in the user on registration
+    req.session.userId = user.id; //log in the user on registration
 
-    return {};
+    return { user };
   }
 
   // ------------------------------------
