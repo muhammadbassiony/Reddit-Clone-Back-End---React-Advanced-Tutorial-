@@ -15,7 +15,7 @@ import {
 } from "type-graphql";
 import { MyContext } from "src/types";
 import { isAuth } from "../middleware/isAuth";
-import { getConnection, getRepository } from "typeorm";
+import { getConnection } from "typeorm";
 import { Updoot } from "../entities/Updoot";
 import { TypeNameMetaFieldDef } from "graphql";
 
@@ -172,20 +172,26 @@ export class PostResolver {
   }
 
   @Mutation(() => Post, { nullable: true })
+  @UseMiddleware(isAuth)
   async updatePost(
     @Arg("id", () => Int) id: number,
-    @Arg("title", () => String) title: string
+    @Arg("title", () => String) title: string,
+    @Arg("text", () => String) text: string,
+    @Ctx() { req }: MyContext
   ): Promise<Post | null> {
-    const post = await Post.findOne({ where: { id } });
-    if (!post) {
-      return null;
-    }
+    const userId = req.session.userId;
 
-    if (typeof title !== "undefined") {
-      await Post.update({ id }, { title });
-    }
+    const result = await getConnection()
+      .createQueryBuilder()
+      .update(Post)
+      .set({ title, text })
+      .where('id = :id and "creatorId" =:creatorId ', { id, creatorId: userId })
+      .returning("*")
+      .execute();
 
-    return post;
+    const post = result.raw[0];
+
+    return post as Post;
   }
 
   @Mutation(() => Boolean)
