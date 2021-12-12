@@ -20,6 +20,16 @@
       "name": "lireddit2",
       "database": "lireddit2",
       "username": "postgres"
+    },
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "askForPassword": true,
+      "driver": "PostgreSQL",
+      "name": "lireddit3",
+      "database": "lireddit3",
+      "username": "postgres"
     }
   ]
 }

@@ -25,13 +25,14 @@ import { createUserLoader } from "./utils/createUserLoader";
 import { createUpdootLoader } from "./utils/createUpdootLoader";
 
 const main = async () => {
-  const conn = createConnection({
+  const conn = await createConnection({
     type: "postgres",
     url: process.env.DATABASE_URL,
     logging: true,
-    synchronize: true,
+    synchronize: true, // false for prod
     entities: [Post, User, Updoot],
   });
+  await conn.runMigrations();
 
   const app = express();
 
@@ -40,6 +41,7 @@ const main = async () => {
   const RedisStore = connectRedis(session);
   const redis = new Redis(process.env.REDIS_URL);
 
+  app.set("proxy", 1);
   app.use(
     cors({
       origin: [process.env.CORS_ORIGIN],
