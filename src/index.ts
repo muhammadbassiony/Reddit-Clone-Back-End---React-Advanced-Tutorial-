@@ -1,5 +1,6 @@
 import { COOKIE_NAME, __prod__ } from "./constants";
 import "reflect-metadata";
+import "dotenv-safe/config";
 
 import express from "express";
 import { ApolloServer } from "apollo-server-express";
@@ -26,9 +27,7 @@ import { createUpdootLoader } from "./utils/createUpdootLoader";
 const main = async () => {
   const conn = createConnection({
     type: "postgres",
-    database: "lireddit2",
-    username: "postgres",
-    password: "admin",
+    url: process.env.DATABASE_URL,
     logging: true,
     synchronize: true,
     entities: [Post, User, Updoot],
@@ -39,11 +38,12 @@ const main = async () => {
   // await Post.delete({});
 
   const RedisStore = connectRedis(session);
-  const redis = new Redis();
+  const redis = new Redis(process.env.REDIS_URL);
 
   app.use(
     cors({
-      origin: ["https://studio.apollographql.com", "http://localhost:3001"],
+      origin: [process.env.CORS_ORIGIN],
+      // origin: ["https://studio.apollographql.com", "http://localhost:3001"],
       credentials: true,
     })
   );
@@ -60,9 +60,10 @@ const main = async () => {
         httpOnly: true,
         sameSite: "lax", //csrf //set to false for apollostudio
         secure: __prod__, // https : in prod only
+        // domain: __prod__ ? '':undefined,
       },
       saveUninitialized: false,
-      secret: "kafnsdkddc.dds",
+      secret: process.env.SESSION_SECRET,
       resave: false,
     })
   );
@@ -85,8 +86,8 @@ const main = async () => {
   await apolloServer.start();
   apolloServer.applyMiddleware({ app, cors: false });
 
-  app.listen(3000, () => {
-    console.log("server started on port 3000");
+  app.listen(parseInt(process.env.PORT), () => {
+    console.log("server started on port 3001");
   });
 };
 

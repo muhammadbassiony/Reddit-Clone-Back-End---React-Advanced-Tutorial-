@@ -108,6 +108,7 @@ export class UserResolver {
 
     await sendEmail(
       email,
+      // change domain for deployment
       `<a href="http://localhost:3001/change-password/${token}">Reset Password</a>`
     );
 
