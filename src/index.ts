@@ -27,12 +27,15 @@ import { createUpdootLoader } from "./utils/createUpdootLoader";
 const main = async () => {
   const conn = await createConnection({
     type: "postgres",
-    url: process.env.DATABASE_URL,
+    // url: process.env.DATABASE_URL,
+    database: "lireddit2",
+    username: "postgres",
+    password: "admin",
     logging: true,
     synchronize: true, // false for prod
     entities: [Post, User, Updoot],
   });
-  await conn.runMigrations();
+  // await conn.runMigrations();
 
   const app = express();
 
@@ -41,11 +44,11 @@ const main = async () => {
   const RedisStore = connectRedis(session);
   const redis = new Redis(process.env.REDIS_URL);
 
-  app.set("proxy", 1);
+  // app.set("trust proxy", 1);
   app.use(
     cors({
-      origin: [process.env.CORS_ORIGIN],
-      // origin: ["https://studio.apollographql.com", "http://localhost:3001"],
+      // origin: [process.env.CORS_ORIGIN!],
+      origin: ["https://studio.apollographql.com", "http://localhost:3001"],
       credentials: true,
     })
   );
@@ -65,7 +68,7 @@ const main = async () => {
         // domain: __prod__ ? '':undefined,
       },
       saveUninitialized: false,
-      secret: process.env.SESSION_SECRET,
+      secret: process.env.SESSION_SECRET!,
       resave: false,
     })
   );
@@ -88,8 +91,8 @@ const main = async () => {
   await apolloServer.start();
   apolloServer.applyMiddleware({ app, cors: false });
 
-  app.listen(parseInt(process.env.PORT), () => {
-    console.log("server started on port 3001");
+  app.listen(parseInt(process.env.PORT!), () => {
+    console.log("server started on port 3000");
   });
 };
 
